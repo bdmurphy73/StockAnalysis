@@ -18,8 +18,8 @@ Python libraries that are downloaded.
 Postgresql database
 
 Python library list (I probably missed something that needs to be installed):
-yfinance
-argparse
+<li>yfinance</li>
+<li>argparse</li>
 numpy
 pandas
 icecream
