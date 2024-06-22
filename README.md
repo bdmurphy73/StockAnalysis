@@ -20,8 +20,9 @@ Postgresql database
 Python library list (I probably missed something that needs to be installed):
 <li>yfinance</li>
 <li>argparse</li>
-numpy
-pandas
-icecream
-psycopg2
-logging
+<li>numpy</li>
+<li>pandas</li>
+<li>icecream</li>
+<li>psycopg2</li>
+<li>logging</li>
+
