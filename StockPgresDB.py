@@ -33,8 +33,8 @@ stock_db_tables = {
 stock_db_params = {
 # Postgres database Root password - 'Pgres#ma$ter'
     'dbname': 'stockanalysis',
-    'user': 'stockfrk',
-    'password': 'Frkpassword',
+    'user': 'stockusername',
+    'password': 'Your#password',
     'host': '192.168.1.1',  # Change this if your database is hosted elsewhere
     'port': 5432,  # Default PostgreSQL port
 }
