@@ -20,14 +20,19 @@ from StockPgresDB import opendatabase, Initializedb, stock_db_params, stock_db_t
 from Versions import MajorVersion, MinorVersion, debug
 import logging
 
-# Set level for ic debug statements
-# zero means none
-# 1 (icdebug > 0) only least important
-# 2 Prcedure/loop start plus level 1
-# 3 Everything
-icdebug = 1
-logging.basicConfig(filename="SDdownload.log")
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    #filename="SDdownload.log",
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logging.debug("This is a debug message.")
+logging.info("This is an info message.")
+logging.warning("This is a warning message.")
+logging.error("This is an error message.")
+logging.critical("This is a critical message.")
+
 
 def GetStockSymbols():
     # Get S&P500 Tickers from Wikipedia
@@ -72,38 +77,30 @@ if __name__ == "__main__":
     Initializedb(dbconn, True, stock_db_tables['Info'], stock_db_info)
     stocks = GetStockSymbols()
     dbcur = dbconn.cursor()
-    logger.info('Starting Get Stock Symbols')
+    logging.info("Starting Get Stock Symbols")
     # Insert the stocks into the database
-    if icdebug > 1:
-        print("Starting loop to add stocks.")
+    logging.info("Starting loop to add stocks.")
     for simb in range(len(stocks)):
         # simb is one of the stocks from the table to put into the table
-        if icdebug > 1:
-            ic(stocks[simb])
+        logging.debug(ic(simb))
         # Process the long name to remove apostrophies
         symb = stocks[simb][0]
         symb = symb.replace(".","-") # The table has stocks with period, but yahoo needs a dash. Replace period in symbol with dash.
         lnm = stocks[simb][1]
-        if icdebug > 2:
-            ic(lnm)
+        logging.info(ic(lnm))
         lnm = lnm.replace("'", "")
-        if icdebug > 2:
-            ic(lnm)
+        loging.info(ic(lnm))
         # Date added to the S&P 500 put into the correct format
         dadd = datetime.strptime(stocks[simb][4], "%Y-%m-%d")
-        if icdebug > 1:
-            ic(dadd)
+        logging.debug(ic(dadd))
         # Year company founded
         adyr = stocks[simb][6][0:4]
         adyr = datetime.strptime(adyr,"%Y")
-        if icdebug > 2:
-            ic(adyr)
+        logging.debug(ic(adyr))
         qry = "INSERT INTO %s (SYMBOL, LNAME, GICSSector, GICSSUB, DATEADDED, CIK, FOUNDED, ACTIVE)" % (stock_db_tables['Info'])
-        if icdebug > 2:
-            ic(qry)
+        logging.debug(ic(qry))
         qry = qry + " VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (stocks[simb][0], lnm, stocks[simb][2], stocks[simb][3], dadd, stocks[simb][5], adyr, 1)
-        if icdebug > 2:
-            ic(qry)
+        logging.debug(ic(qry))
         dbcur.execute(qry)
         dbconn.commit()
 
