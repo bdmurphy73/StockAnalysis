@@ -24,5 +24,7 @@ Python library list (I probably missed something that needs to be installed):
 <li>pandas</li>
 <li>icecream</li>
 <li>psycopg2</li>
-<li>logging</li>
+<li>bs4</li> # BeautifulSoup 
+<li>requests</li>
+
 
