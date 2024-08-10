@@ -3,11 +3,33 @@
 #
 #  Copyright (c) 2024, Bryan Murphy
 #
-#  license: GNU LGPL
-#
+'''
+    Notes on database
+    For remote access to the postgresql datbase you need to modify files and firewall
+    
+    In postgresql.conf
+    #listen_addresses = 'localhost'
+    listen_addresses = '*'
+
+    In pg_hba.conf file
+    Add the ip address of the machines that will access the database
+
+    Firewall
+    sudo ufw allow 5432/tcp
+
+    Create the database on the machine
+    Create the user for the database
+    Align the information in the section below
+
+    Grant the user access to the public schema to create tables.
+    GRANT ALL ON ALL TABLES IN SCHEMA public to user
+
+
+'''
+
+
 import psycopg2
 import logging
-
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -34,7 +56,7 @@ stock_db_params = {
     'dbname': 'stockanaltest',
     'user': 'stockfrk',
     'password': 'Stk$freak#pass7',
-    'host': '192.168.123.5',  # Change this if your database is hosted elsewhere
+    'host': '192.168.123.66',  # Change this if your database is hosted elsewhere
     'port': 5432,  # Default PostgreSQL port
 }
 

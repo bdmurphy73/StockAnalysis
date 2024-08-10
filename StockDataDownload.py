@@ -19,54 +19,27 @@
 
 
 import yfinance as yf
-#from yahoofinancials import YahooFinancials
-# Need to have simple arguments
-# Run full download, all history for the last two years
-# Run daily, just the last day's data
-# Get the last week of data
-# For each type check the date to make sure it is not already in the database before we add the data.
 import argparse
 import numpy as np
 import pandas as pd
-#import requests 
-#import sqlite3
-#import os
-#import math
-#from pandas_datareader import data as pdr
+from icecream import ic
+
 import sys
 #import json
-from icecream import ic
 from datetime import datetime
-#from datetime import timedelta
 import time
 import calendar
-import psycopg2
-import logging
 
-from StockPgresDB import opendatabase, Initializedb, stock_db_params, stock_db_tables, stock_db_info
-
-
+from StockPgresDB import *
+from StockCommon import *
 
 # Do I wipe the database table while debugging
 WipeDB = False
-logging.basicConfig(
-    level=logging.INFO,
-    #filename="SDdownload.log",
-    format="%(asctime)s %(levelname)s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
-logging.debug("This is a debug message.")
-logging.info("This is an info message.")
-logging.warning("This is a warning message.")
-logging.error("This is an error message.")
-logging.critical("This is a critical message.")
-
 
 def GetStockData(symboll, sddate='2024-01-01', eddate=datetime.today().strftime('%Y-%m-%d')):
     #edate = datetime.today().strftime('%Y-%m-%d')
     #print("Starting GetStockData")
-    ic(symboll, sddate, eddate)
+    logging.debug(ic(symboll, sddate, eddate))
     stk_df = yf.download(symboll, sddate, eddate)
     logging.debug(stk_df.head())
     return(stk_df)
@@ -98,7 +71,7 @@ def args(parser):
     tframe = tframe.lower()
     logging.debug(ic(tframe))
     # Force weekly <<<<--------------- Change this return(tframe)
-    return("weekly")
+    return(tframe)
 
 ##################################################
 # Return the date one week before today.
@@ -196,8 +169,6 @@ def nextday(today):
 # False if the database does not have the data
 #
 def inhistorycheck(conn, stock, sdata):
-    # Returns True or False
-
     qry = "SELECT * FROM %s WHERE HDATE='%s' AND SYMBOL='%s'" % (stock_db_tables['His'], sdata[0], stock)
     logging.debug(ic(qry))
     cnct = conn.cursor()
@@ -226,9 +197,7 @@ def gethisdata(Symbol, STart, ENd):
     logging.info(ic("I tried to get data", Symbol, stock_df))
     return(stock_df)
 
-
-
-def main():
+def main() -> None:
     # Open database stockinfo for the symbols
     # Read in the symbols then get the history.
     # 
@@ -237,34 +206,28 @@ def main():
     # Use WipeDB = True to wiped database each time to make it clean.
     # Use WipeDB = False when adding data. 
     stockdb = opendatabase()
-    Cursr = stockdb.cursor()
+    #Cursr = stockdb.cursor()
 
     # Init argparser then call function to setup args
     parser = argparse.ArgumentParser(description='Utility to update stock history data in stockdata database')
     tframe = args(parser)
-    #ic(parser, tframe)
-    #Default to daily if nothing else
-    ############################
-    #
-    #
-    #
-    #tframe = "weekly"
+
     tday = datetime.today()
     if tframe == "daily":
-        print("Daily update")
+        logging.info("Daily update")
         starttime = daybefore(tday)
         #print("timedelta change.")
         #starttime = datetime.deltatime(day = -1)
         logging.debug(ic(starttime))
     elif tframe == "weekly":
-        print("Weekly update")
+        logging.info("Weekly update")
         starttime = weekbefore(tday)
         # print("timedelta weekly")
         #starttime = datetime.timedelta(week = -1)
         logging.debug(ic(starttime))
     else:
         # If not daily or weekly then do full download. That means two years from today.
-        print("Full update")
+        logging.info("Full update")
         starttime = datetime(int(tday.year-2), int(tday.month), int(tday.day)).strftime('%Y-%m-%d')
         logging.debug(ic(starttime))
 
@@ -287,11 +250,8 @@ def main():
         Symbol = str(smb)
         Symbol = Symbol.strip("',()")
         Symbol = Symbol.replace(".","-") # The table has stocks with period, but yahoo needs a dash. Replace period in symbol with dash.
-        #Symbol = "BRK.B"
         logging.debug(ic(Symbol, starttime, endtime))
-        #stock_df = yf.download(Symbol, start=starttime, end=endtime, rounding=True)
         stock_df = gethisdata(Symbol, starttime, endtime)
-        #stock_df = gethisdata("xxx", starttime, endtime)
         logging.info(ic("Did I get back an empty?", stock_df))
         if stock_df.empty:
             print(f"Symbol {smb} did not return data.")
@@ -300,9 +260,9 @@ def main():
         logging.debug(ic(stock_df))
         stock_df.reset_index(inplace=True)
         stock_df['Date'] = stock_df['Date'].dt.strftime('%Y-%m-%d')
-        logging.info(ic(stock_df['Date']))
-        logging.info(ic(len(stock_df)))
-        logging.info(ic(stock_df))
+        logging.debug(ic(stock_df['Date']))
+        logging.debug(ic(len(stock_df)))
+        logging.debug(ic(stock_df))
         cnct = stockdb.cursor()
         for t in range(len(stock_df)):
             logging.debug(ic(t, Stkhisd))
@@ -316,15 +276,11 @@ def main():
                     cnct.execute(qry)
                     Stkhisd += 1
                 except psycopg2.Error as error:
-                    print("Failed to execute the insert query", error)
                     logging.error("Failed to execute the insert query", error)
         Stkcount += 1
         Totalcnt += Stkhisd  
         Stkhisd = 0
         stockdb.commit()
-        #if debug:
-        #    if Symbol != "MMM":
-        #        break
 
     logging.info('Results')
     logging.info(f"Total stocks processed is {Stkcount}")
@@ -338,7 +294,8 @@ def main():
 
 
 if __name__ == '__main__':
-    print("Getting Stock Historical Data")
-    sys.exit(main())  
+    today = datetime.today().strftime('%Y-%m-%d')
+    logging.info(f"Getting Stock Historical Data for {today}")
+    main()  
 
     

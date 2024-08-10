@@ -13,26 +13,11 @@
 
 import bs4 as bs # BeautifulSoup used to get a table from wiki page
 import requests # Used to get the webpage, url
-from datetime import datetime
-import psycopg2
 from icecream import ic # Used to print debug messages
-from StockPgresDB import opendatabase, Initializedb, stock_db_params, stock_db_tables, stock_db_info
-from Versions import MajorVersion, MinorVersion, debug
-import logging
+from datetime import datetime
 
-logging.basicConfig(
-    level=logging.INFO,
-    #filename="SDdownload.log",
-    format="%(asctime)s %(levelname)s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
-logging.debug("This is a debug message.")
-logging.info("This is an info message.")
-logging.warning("This is a warning message.")
-logging.error("This is an error message.")
-logging.critical("This is a critical message.")
-
+from StockPgresDB import *
+from StockCommon import *
 
 def GetStockSymbols():
     # Get S&P500 Tickers from Wikipedia
@@ -64,17 +49,18 @@ def GetStockSymbols():
     Founded = "1888-01-01"
     Stklist = [ticker, stkname, GICSSector, GICSSub, DateAdded, CIK, Founded]
     tickers.append(Stklist)
-#    ic(tickers)
     return(tickers)
 
 
 if __name__ == "__main__":
     #Open Database
+    #bob = "Testing" # trying to figure out why ic function didn't work below.
+    #ic(bob)
     dbconn = opendatabase()
     #
     #  Clear the table so there are no duplicates
     #
-    Initializedb(dbconn, True, stock_db_tables['Info'], stock_db_info)
+    Initializedb(dbconn, True, stock_db_tables['Info'], stock_db_info) # Function in file StockPresDB.py
     stocks = GetStockSymbols()
     dbcur = dbconn.cursor()
     logging.info("Starting Get Stock Symbols")
@@ -89,7 +75,7 @@ if __name__ == "__main__":
         lnm = stocks[simb][1]
         logging.info(ic(lnm))
         lnm = lnm.replace("'", "")
-        loging.info(ic(lnm))
+        logging.info(ic(lnm))
         # Date added to the S&P 500 put into the correct format
         dadd = datetime.strptime(stocks[simb][4], "%Y-%m-%d")
         logging.debug(ic(dadd))
@@ -105,7 +91,7 @@ if __name__ == "__main__":
         dbconn.commit()
 
 dbconn.close()
-print(f"Finished and processed {len(stocks)} stock records")
+logging.info(f"Finished and processed {len(stocks)} stock records")
 
 
 

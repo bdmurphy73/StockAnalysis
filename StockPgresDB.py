@@ -23,13 +23,13 @@ stock_db_tables = {
     'Info': "stockinfo", # Basic stock info for the S&P 500
     'Accnt': "accounts", # Cash is part of each account
     'Params': "parameters", # Parameters to back test. In the current market enviornment which parameters make the most money?
-    'Calrslts': "calcuresults", # for each parameter line calculate the resutls and store for each stock. - include up to last date of calculation, Params ID
-    # pandas dataframe stored with added columns - may need to add colums VERSION dependent
-    'Buy' : "buytable", # Table we should buy. Stays in the table until purchase. The stock then goes to open table.
-    'Sell' : "selltable", # We have reached a Sell point for the stock
-    'Open' : "openpositions", # Current open positions for all accounts
-    'Transactions' : "trans", # Log transactions
-    'TransHistory' : "Trans history" # After selling put the total into history, buy, sell, profit
+    'Calcrslts': "calcuresults", # for each parameter line calculate the resutls and store for each stock. - include up to last date of calculation, Params ID
+# Some are for future work
+#    'Buy' : "buytable", # Table we should buy. Stays in the table until purchase. The stock then goes to open table.
+#    'Sell' : "selltable", # We have reached a Sell point for the stock
+#    'Open' : "openpositions", # Current open positions for all accounts
+#    'Transactions' : "trans", # Log transactions
+#    'TransHistory' : "Trans history" # After selling put the total into history, buy, sell, profit
 }
 
 # Info : stockinfo table
@@ -71,22 +71,23 @@ stock_db_account = ''' CREATE TABLE IF NOT EXISTS public.%s
         );
     ''' % (stock_db_tables['Accnt'])
 
-# Table to hold the results of calculations with stock, params id, last calc date. 
-# for a parameter set and historical dates the values won't change. 
-# Can use this to store the backtest results for each day with each parameter id
-# Then use the results to decide to buy/sell on each day
-# Allows calculations to run indepdent of buy/sell testing
-stock_db_calrslts = ''' CREATE TABLE IF NOT EXISTS public.%s 
+# Table to hold the results of tech analysis calculations
+# The important parts are:
+# Paramid - which paramid was use in the calculation
+# mgrversion - the version assigned to the calculation routine
+# Symbol, date
+# The result of the calculation. Unless the version of the routine changes
+# This data is static and used later by a buy routine (not defined yet)
+# # 
+stock_db_calcrslts = ''' CREATE TABLE IF NOT EXISTS public.%s 
         (id          serial  Primary Key NOT NULL,
         paramid     bigint    NOT NULL,
-        acntnumber  text    NOT NULL,
         symbol      text    NOT NULL,
         ldate       date    NOT NULL,
         mgrversion  real    NOT NULL,
-        rslt        real    NOT NULL,
-        Owner       text    NOT NULL
+        rslt        real    NOT NULL
         );
-    ''' % (stock_db_tables['Calrslts'])
+    ''' % (stock_db_tables['Calcrslts'])
 
 # Params : parameters table
 params_table = ''' CREATE TABLE IF NOT EXISTS public.%s(
@@ -109,15 +110,11 @@ params_table = ''' CREATE TABLE IF NOT EXISTS public.%s(
     bb_n real DEFAULT 20.0,
     bb_sigma real DEFAULT 2.0,
     bb_mul real DEFAULT 1.0,
-    profit_target real DEFAULT 0.10,
-    loss_target real DEFAULT 0.05,
-    time_limit real DEFAULT 5.0,
-    roc_mul real DEFAULT 1.0,
-    roc_n real DEFAULT 14.0,
     rsi_n real DEFAULT 14.0,
     rsi_mul real DEFAULT 1.0,
     stoch_n real DEFAULT 20.0,
     stoch_mul real DEFAULT 1.0,
+    ttmsq_mul real DEFAULT 5.0,
     PRIMARY KEY(id)
 );
 '''  % (stock_db_tables['Params'])
@@ -125,6 +122,7 @@ params_table = ''' CREATE TABLE IF NOT EXISTS public.%s(
 def Initializedb(db, dropflag, tablenm, tableschm) -> bool:
     cursor = db.cursor()
     rflag = False # only set to True if it works.
+
     if dropflag:
         sql_query = "DROP TABLE IF EXISTS %s" % tablenm
         logging.info(f"Dropping table: {sql_query}")
@@ -177,6 +175,10 @@ def main() -> None:
     logging.info(f"Major version {majorversion}, Minor version {minorversion}.")
     droptable = False
     db = opendatabase()
+    #Change privalage to public teamplate to create tables
+    dbcur = db.cursor()
+    sql = f"GRANT ALL ON ALL TABLES IN SCHEMA public to {stock_db_params['user']}"
+    dbcur.execute(sql)
     if Initializedb(db, droptable, stock_db_tables['Info'], stock_db_info):
         logging.info(F"Table {stock_db_tables['Info']} created.")
     else:
@@ -194,7 +196,7 @@ def main() -> None:
         logging.info(F"Table {stock_db_tables['Params']} created.")
     else:
         logging.info(f"Well that didn't work. Table {stock_db_tables['Params']} isn't ready.")
-    if Initializedb(db, droptable, stock_db_tables['Calrslts'], stock_db_calrslts):
+    if Initializedb(db, droptable, stock_db_tables['Calrslts'], stock_db_calcrslts):
         logging.info(F"Table {stock_db_tables['Calrslts']} created.")
     else:
         logging.info(f"Well that didn't work. Table {stock_db_tables['Calrslts']} isn't ready.")
