@@ -1,0 +1,12 @@
+PyMySQL==1.1.2
+cryptography==46.0.3
+icecream==2.1.8
+beautifulsoup4==4.14.3
+requests==2.32.5
+yfinance==0.2.66
+yfinance
+argparse
+numpy
+pandas
+bs4 #BeautifulSoup 
+requests

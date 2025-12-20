@@ -22,21 +22,34 @@ from StockCommon import *
 def GetStockSymbols():
     # Get S&P500 Tickers from Wikipedia
     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    response = requests.get(url)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        logging.error("Failed to fetch S&P 500 list: HTTP %s", response.status_code)
+        return []
     soup = bs.BeautifulSoup(response.text, "html.parser")
     table = soup.find("table", {"class": "wikitable sortable"})
+    if table is None:
+        logging.error("Could not find S&P 500 table on the page")
+        return []
     tickers = []
 
-    for row in table.findAll("tr")[1:]:
-        ticker = row.findAll("td")[0].text.strip()
+    for row in table.find_all("tr")[1:]:
+        cells = row.find_all("td")
+        # Need at least symbol and name
+        if len(cells) < 2:
+            continue
+        ticker = cells[0].text.strip()
         # Change any '.' to '-' like BRK.B to BRK-B
         ticker = ticker.replace(".", "-")
-        stkname = row.findAll("td")[1].text.strip()
-        GICSSector = row.findAll("td")[2].text.strip()
-        GICSSub = row.findAll("td")[3].text.strip()
-        DateAdded = row.findAll("td")[5].text.strip()
-        CIK = row.findAll("td")[6].text.strip()
-        Founded = row.findAll("td")[7].text.strip()
+        stkname = cells[1].text.strip() if len(cells) > 1 else ""
+        GICSSector = cells[2].text.strip() if len(cells) > 2 else ""
+        GICSSub = cells[3].text.strip() if len(cells) > 3 else ""
+        DateAdded = cells[5].text.strip() if len(cells) > 5 else ""
+        CIK = cells[6].text.strip() if len(cells) > 6 else ""
+        Founded = cells[7].text.strip() if len(cells) > 7 else ""
         Stklist = [ticker, stkname, GICSSector, GICSSub, DateAdded, CIK, Founded]
         tickers.append(Stklist)
     # Add SPY to the list
@@ -57,41 +70,51 @@ if __name__ == "__main__":
     #bob = "Testing" # trying to figure out why ic function didn't work below.
     #ic(bob)
     dbconn = opendatabase()
-    #
-    #  Clear the table so there are no duplicates
-    #
-    Initializedb(dbconn, True, stock_db_tables['Info'], stock_db_info) # Function in file StockPresDB.py
+    if dbconn is None:
+        logging.error("Could not open database; aborting")
+        sys.exit(1)
+
+    # Clear the table so there are no duplicates
+    Initializedb(dbconn, True, stock_db_tables['Info'], stock_db_info) # Function in file StockPgresDB.py
+
     stocks = GetStockSymbols()
-    dbcur = dbconn.cursor()
     logging.info("Starting Get Stock Symbols")
     # Insert the stocks into the database
     logging.info("Starting loop to add stocks.")
-    for simb in range(len(stocks)):
-        # simb is one of the stocks from the table to put into the table
-        logging.debug(ic(simb))
-        # Process the long name to remove apostrophies
-        symb = stocks[simb][0]
-        symb = symb.replace(".","-") # The table has stocks with period, but yahoo needs a dash. Replace period in symbol with dash.
-        lnm = stocks[simb][1]
-        logging.info(ic(lnm))
-        lnm = lnm.replace("'", "")
-        logging.info(ic(lnm))
-        # Date added to the S&P 500 put into the correct format
-        dadd = datetime.strptime(stocks[simb][4], "%Y-%m-%d")
-        logging.debug(ic(dadd))
-        # Year company founded
-        adyr = stocks[simb][6][0:4]
-        adyr = datetime.strptime(adyr,"%Y")
-        logging.debug(ic(adyr))
-        qry = "INSERT INTO %s (SYMBOL, LNAME, GICSSector, GICSSUB, DATEADDED, CIK, FOUNDED, ACTIVE)" % (stock_db_tables['Info'])
-        logging.debug(ic(qry))
-        qry = qry + " VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (stocks[simb][0], lnm, stocks[simb][2], stocks[simb][3], dadd, stocks[simb][5], adyr, 1)
-        logging.debug(ic(qry))
-        dbcur.execute(qry)
-        dbconn.commit()
 
-dbconn.close()
-logging.info(f"Finished and processed {len(stocks)} stock records")
+    insert_sql = f"INSERT INTO `{stock_db_tables['Info']}` (SYMBOL, LNAME, GICSSector, GICSSUB, DATEADDED, CIK, FOUNDED, ACTIVE) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+
+    for simb, stock in enumerate(stocks):
+        logging.debug(ic(simb))
+        symb = stock[0].replace('.', '-')
+        lnm = stock[1].replace("'", "")
+
+        # Date added to the S&P 500 put into the correct format
+        try:
+            dadd = datetime.strptime(stock[4], "%Y-%m-%d").date()
+        except Exception:
+            dadd = None
+            logging.debug("Failed to parse DateAdded for %s: %s", symb, stock[4])
+
+        # Year company founded
+        try:
+            adyr = stock[6][0:4]
+            adyr = datetime.strptime(adyr, "%Y").date()
+        except Exception:
+            adyr = None
+            logging.debug("Failed to parse Founded year for %s: %s", symb, stock[6])
+
+        params = (symb, lnm, stock[2], stock[3], dadd, stock[5], adyr, 1)
+
+        try:
+            with dbconn.cursor() as dbcur:
+                dbcur.execute(insert_sql, params)
+            dbconn.commit()
+        except pymysql.Error as e:
+            logging.error("Failed to insert %s: %s", symb, e)
+
+    closedatabase(dbconn)
+    logging.info("Finished and processed %d stock records", len(stocks))
 
 
 

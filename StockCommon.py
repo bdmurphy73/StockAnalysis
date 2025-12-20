@@ -5,12 +5,8 @@
 #
 '''
     Notes on database
-    For remote access to the postgresql datbase you need to modify files and firewall
+    For remote access to the mysql datbase you need to modify files and firewall
     
-    In postgresql.conf
-    #listen_addresses = 'localhost'
-    listen_addresses = '*'
-
     In pg_hba.conf file
     Add the ip address of the machines that will access the database
 
@@ -28,7 +24,7 @@
 '''
 
 
-import psycopg2
+import pymysql.cursors
 import logging
 
 logging.basicConfig(
@@ -45,7 +41,7 @@ Change_Date = "2024-06-28"
 recalculateall = False
 
 # Parameters to log into the database.
-# The database must already be setup and allowing connections from you device
+# The database must already be setup and allowing connections from your device
 #
 # dbname -> stockanalysis is working database
 # dbname -> stockanaltest is testing database table working
@@ -53,38 +49,85 @@ recalculateall = False
 #
 stock_db_params = {
 # Postgres database Root password - 'Pgres#ma$ter'
-    'dbname': 'stockanaltest',
+    'database': 'stockanal',
     'user': 'stockfrk',
     'password': 'Stk$freak#pass7',
-    'host': '192.168.123.66',  # Change this if your database is hosted elsewhere
-    'port': 5432,  # Default PostgreSQL port
+    'host': 'localhost',  # Change this if your database is hosted elsewhere
+    'port': 3306,
+    'cursorclass': pymysql.cursors.DictCursor,
+    'charset': 'utf8mb4'
 }
 
-# Basic open database and provide the connection for others
+
 def opendatabase():
+    """Open and return a pymysql connection, or None on failure."""
     try:
-        db = psycopg2.connect(**stock_db_params)
-    except psycopg2.Error as e:
-        logging.error(e)
-        return(False)
-    logging.info("Looks like we are connected to server %s and database %s" % (stock_db_params['host'], stock_db_params['dbname']))
-    return(db)
+        logging.info("Connecting to DB %s at %s:%s",
+                     stock_db_params.get('database'),
+                     stock_db_params.get('host'),
+                     stock_db_params.get('port'))
+        conn = pymysql.connect(**stock_db_params)
+        try:
+            conn.autocommit(True)
+        except Exception:
+            # Some pymysql versions may expose autocommit differently; ignore if not supported
+            pass
+        logging.info("Database connection established")
+        return conn
+    except pymysql.Error as e:
+        logging.error("Failed to connect to database: %s", e)
+        return None
+
+
+
 
 def get_table_col_names(dbconn, table_str):
     print(f"Columns for table {table_str}")
     col_names = []
+    if dbconn is None:
+        logging.error("get_table_col_names called with None dbconn")
+        return col_names
+
+    # Validate table identifier to avoid SQL injection. Allow schema.table using dots.
+    import re
+    if not re.match(r'^[A-Za-z0-9_\.]+$', table_str):
+        logging.error("Invalid table name: %s", table_str)
+        return col_names
+
+    # Quote each identifier part with backticks (safe for MySQL identifiers)
+    parts = table_str.split('.')
+    quoted = '.'.join([f"`{p}`" for p in parts])
+
     try:
-        cur = dbconn.cursor()
-        cur.execute("select * from " + table_str + " LIMIT 0")
-        for desc in cur.description:
-            col_names.append(desc[0])        
-    except psycopg2.Error as e:
-        logging.error(e)
+        with dbconn.cursor() as cur:
+            cur.execute(f"SELECT * FROM {quoted} LIMIT 0")
+            if cur.description:
+                for desc in cur.description:
+                    col_names.append(desc[0])
+    except pymysql.Error as e:
+        logging.error("Error fetching columns for %s: %s", table_str, e)
+    except Exception as e:
+        logging.error("Unexpected error in get_table_col_names: %s", e)
     return col_names
 
+
+def closedatabase(conn):
+    """Close a pymysql connection safely."""
+    if conn is None:
+        return
+    try:
+        conn.close()
+        logging.info("Database connection closed")
+    except Exception as e:
+        logging.error("Error closing database connection: %s", e)
+
 def main() -> None:
+    logging.info("Starting the program")
+    logging.info("Version info: %s.%s", majorversion, minorversion)
+    logging.info("Change Date: %s", Change_Date)
+
     db = opendatabase()
-    db.close()
+    closedatabase(db)
 
 if __name__ == '__main__':
     main()

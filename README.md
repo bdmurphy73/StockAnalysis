@@ -23,7 +23,8 @@ Python library list (I probably missed something that needs to be installed):
 <li>numpy</li>
 <li>pandas</li>
 <li>icecream</li>
-<li>psycopg2</li>
+<li>pymysql</li>
+<li>cryptography</li>
 <li>bs4</li> # BeautifulSoup 
 <li>requests</li>
 
