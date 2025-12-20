@@ -15,6 +15,7 @@ import bs4 as bs # BeautifulSoup used to get a table from wiki page
 import requests # Used to get the webpage, url
 from icecream import ic # Used to print debug messages
 from datetime import datetime
+import re
 
 from StockPgresDB import *
 from StockCommon import *
@@ -30,27 +31,58 @@ def GetStockSymbols():
         logging.error("Failed to fetch S&P 500 list: HTTP %s", response.status_code)
         return []
     soup = bs.BeautifulSoup(response.text, "html.parser")
-    table = soup.find("table", {"class": "wikitable sortable"})
+    # Find the table that contains the S&P 500 listings by looking for expected headers
+    table = None
+    for t in soup.find_all('table'):
+        hdrs = [th.text.strip().lower() for th in t.find_all('th')]
+        if any('symbol' in h for h in hdrs) and any('security' in h for h in hdrs):
+            table = t
+            break
     if table is None:
         logging.error("Could not find S&P 500 table on the page")
         return []
     tickers = []
 
+    def clean_text(node_text: str) -> str:
+        if node_text is None:
+            return ''
+        # Remove citation brackets like [1], newlines, and trim
+        txt = re.sub(r"\[.*?\]", "", node_text)
+        return txt.replace('\n', ' ').strip()
+
+    def parse_date(txt: str):
+        txt = clean_text(txt)
+        if not txt:
+            return None
+        # Try several common formats
+        fmts = ["%Y-%m-%d", "%Y", "%B %d, %Y", "%d %B %Y", "%b %d, %Y"]
+        for f in fmts:
+            try:
+                return datetime.strptime(txt, f).date()
+            except Exception:
+                continue
+        # Try to extract a 4-digit year
+        m = re.search(r"(\d{4})", txt)
+        if m:
+            try:
+                return datetime.strptime(m.group(1), "%Y").date()
+            except Exception:
+                return None
+        return None
+
     for row in table.find_all("tr")[1:]:
         cells = row.find_all("td")
-        # Need at least symbol and name
         if len(cells) < 2:
             continue
-        ticker = cells[0].text.strip()
-        # Change any '.' to '-' like BRK.B to BRK-B
-        ticker = ticker.replace(".", "-")
-        stkname = cells[1].text.strip() if len(cells) > 1 else ""
-        GICSSector = cells[2].text.strip() if len(cells) > 2 else ""
-        GICSSub = cells[3].text.strip() if len(cells) > 3 else ""
-        DateAdded = cells[5].text.strip() if len(cells) > 5 else ""
-        CIK = cells[6].text.strip() if len(cells) > 6 else ""
-        Founded = cells[7].text.strip() if len(cells) > 7 else ""
-        Stklist = [ticker, stkname, GICSSector, GICSSub, DateAdded, CIK, Founded]
+        ticker = clean_text(cells[0].text)
+        ticker = ticker.replace('.', '-')
+        stkname = clean_text(cells[1].text) if len(cells) > 1 else ''
+        GICSSector = clean_text(cells[2].text) if len(cells) > 2 else ''
+        GICSSub = clean_text(cells[3].text) if len(cells) > 3 else ''
+        DateAdded_raw = clean_text(cells[5].text) if len(cells) > 5 else ''
+        CIK = clean_text(cells[6].text) if len(cells) > 6 else ''
+        Founded_raw = clean_text(cells[7].text) if len(cells) > 7 else ''
+        Stklist = [ticker, stkname, GICSSector, GICSSub, DateAdded_raw, CIK, Founded_raw]
         tickers.append(Stklist)
     # Add SPY to the list
     ticker = "SPY"
@@ -90,16 +122,38 @@ if __name__ == "__main__":
         lnm = stock[1].replace("'", "")
 
         # Date added to the S&P 500 put into the correct format
-        try:
-            dadd = datetime.strptime(stock[4], "%Y-%m-%d").date()
-        except Exception:
-            dadd = None
-            logging.debug("Failed to parse DateAdded for %s: %s", symb, stock[4])
+        def _parse_date_txt(txt):
+            if not txt:
+                return None
+            txt = re.sub(r"\[.*?\]", "", str(txt)).strip()
+            fmts = ["%Y-%m-%d", "%Y", "%B %d, %Y", "%d %B %Y", "%b %d, %Y"]
+            for f in fmts:
+                try:
+                    return datetime.strptime(txt, f).date()
+                except Exception:
+                    continue
+            m = re.search(r"(\d{4})", txt)
+            if m:
+                try:
+                    return datetime.strptime(m.group(1), "%Y").date()
+                except Exception:
+                    return None
+            logging.debug("Failed to parse DateAdded for %s: %s", symb, txt)
+            return None
+
+        dadd = _parse_date_txt(stock[4])
 
         # Year company founded
+        # Parse Founded year into a date (use Jan 1 of the year)
         try:
-            adyr = stock[6][0:4]
-            adyr = datetime.strptime(adyr, "%Y").date()
+            if stock[6]:
+                m = re.search(r"(\d{4})", stock[6])
+                if m:
+                    adyr = datetime.strptime(m.group(1), "%Y").date()
+                else:
+                    adyr = None
+            else:
+                adyr = None
         except Exception:
             adyr = None
             logging.debug("Failed to parse Founded year for %s: %s", symb, stock[6])
