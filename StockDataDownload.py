@@ -32,6 +32,7 @@ import calendar
 
 from StockPgresDB import *
 from StockCommon import *
+import pymysql
 
 # Do I wipe the database table while debugging
 WipeDB = False
@@ -45,12 +46,24 @@ def GetStockData(symboll, sddate='2024-01-01', eddate=datetime.today().strftime(
     return(stk_df)
 
 def getstocklist(dbconn):
-    dbcnct = dbconn.cursor()
-    qry = "SELECT SYMBOL FROM %s WHERE ACTIVE=1" % (stock_db_tables['Info'])
-    dbcnct.execute(qry)
-    rslts = dbcnct.fetchall()
-    logging.debug(ic(rslts))
-    return(rslts)
+    try:
+        with dbconn.cursor() as cur:
+            qry = f"SELECT SYMBOL FROM `{stock_db_tables['Info']}` WHERE ACTIVE=1"
+            cur.execute(qry)
+            rows = cur.fetchall()
+        # rows may be list of dicts depending on cursorclass; normalize to list of strings
+        syms = []
+        for r in rows:
+            if isinstance(r, dict):
+                syms.append(r.get('SYMBOL'))
+            else:
+                # tuple or single value
+                syms.append(r[0])
+        logging.debug(ic(syms))
+        return syms
+    except pymysql.Error as e:
+        logging.error("Error fetching stock list: %s", e)
+        return []
 
 #############################################################
 # Parse args with argument a parser object
@@ -168,15 +181,17 @@ def nextday(today):
 # True if the database has the data
 # False if the database does not have the data
 #
-def inhistorycheck(conn, stock, sdata):
-    qry = "SELECT * FROM %s WHERE HDATE='%s' AND SYMBOL='%s'" % (stock_db_tables['His'], sdata[0], stock)
-    logging.debug(ic(qry))
-    cnct = conn.cursor()
-    cnct.execute(qry)
-    if(cnct.fetchone()):
-        return(True)
-    else:
-        return(False)
+def inhistorycheck(conn, stock, sdate):
+    """Return True if history row exists for stock on sdate (YYYY-MM-DD)."""
+    try:
+        with conn.cursor() as cur:
+            qry = f"SELECT 1 FROM `{stock_db_tables['His']}` WHERE HDATE=%s AND SYMBOL=%s LIMIT 1"
+            cur.execute(qry, (sdate, stock))
+            row = cur.fetchone()
+        return bool(row)
+    except pymysql.Error as e:
+        logging.error("Error checking history for %s %s: %s", stock, sdate, e)
+        return False
 
 def gethisdata(Symbol, STart, ENd):
     #setup loop to try three times if there is an error.
@@ -247,9 +262,9 @@ def main() -> None:
     allsymbols = getstocklist(stockdb)
     for smb in allsymbols:
         logging.debug(ic(smb))
-        Symbol = str(smb)
+        Symbol = str(smb).strip()
         Symbol = Symbol.strip("',()")
-        Symbol = Symbol.replace(".","-") # The table has stocks with period, but yahoo needs a dash. Replace period in symbol with dash.
+        Symbol = Symbol.replace(".","-") # Yahoo uses dash instead of period in tickers
         logging.debug(ic(Symbol, starttime, endtime))
         stock_df = gethisdata(Symbol, starttime, endtime)
         logging.info(ic("Did I get back an empty?", stock_df))
@@ -259,24 +274,76 @@ def main() -> None:
             continue
         logging.debug(ic(stock_df))
         stock_df.reset_index(inplace=True)
-        stock_df['Date'] = stock_df['Date'].dt.strftime('%Y-%m-%d')
+        # Flatten MultiIndex columns produced by yfinance when a ticker is present
+        if isinstance(stock_df.columns, pd.MultiIndex):
+            newcols = []
+            for col in stock_df.columns:
+                if isinstance(col, tuple):
+                    parts = [str(c).strip() for c in col if c and str(c).strip() != '']
+                    newcols.append('_'.join(parts) if parts else '')
+                else:
+                    newcols.append(str(col))
+            stock_df.columns = [c if c else f'col_{i}' for i, c in enumerate(newcols)]
+
+        # Find a suitable date column (looks for column name containing 'date')
+        date_col = None
+        for c in stock_df.columns:
+            if 'date' in str(c).lower():
+                date_col = c
+                break
+        if date_col is None:
+            date_col = stock_df.columns[0]
+
+        # Ensure each cell in the date column is a scalar (not a Series) then format
+        def _scalar_date(x):
+            if isinstance(x, (pd.Series, list, tuple)):
+                try:
+                    return x.iloc[0] if isinstance(x, pd.Series) else x[0]
+                except Exception:
+                    return None
+            return x
+
+        stock_df[date_col] = stock_df[date_col].apply(_scalar_date)
+        stock_df['Date'] = pd.to_datetime(stock_df[date_col], errors='coerce').dt.strftime('%Y-%m-%d')
         logging.debug(ic(stock_df['Date']))
         logging.debug(ic(len(stock_df)))
         logging.debug(ic(stock_df))
-        cnct = stockdb.cursor()
-        for t in range(len(stock_df)):
-            logging.debug(ic(t, Stkhisd))
-            if inhistorycheck(stockdb, Symbol, stock_df.iloc[t]):
-                logging.debug(f"{Symbol} is in the database for date {stock_df.iloc[t]}")
-            else:
-                #print("Not in the database.")
-                qry = "INSERT INTO %s (HDATE, SYMBOL, OPEN, HIGH, LOW, CLOSE, AdjClose, VOLUME) VALUES ('%s', '%s', %s, %s, %s, %s, %s, %s)" %  (stock_db_tables['His'], stock_df.iloc[t][0], Symbol, stock_df.iloc[t][1], stock_df.iloc[t][2], stock_df.iloc[t][3], stock_df.iloc[t][4], stock_df.iloc[t][5], stock_df.iloc[t][6])
-                logging.debug(ic(qry))
-                try:
-                    cnct.execute(qry)
-                    Stkhisd += 1
-                except psycopg2.Error as error:
-                    logging.error("Failed to execute the insert query", error)
+        # Insert rows using parameterized SQL
+        insert_sql = f"INSERT INTO `{stock_db_tables['His']}` (HDATE, SYMBOL, OPEN, HIGH, LOW, CLOSE, `AdjClose`, VOLUME) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        # Helper to find a column value by substring (handles flattened multiindex names)
+        def _find_val(row, key_substr):
+            ks = key_substr.lower()
+            for c in row.index:
+                if ks in str(c).lower():
+                    val = row.get(c)
+                    if isinstance(val, (pd.Series, list, tuple)):
+                        try:
+                            return val.iloc[0] if isinstance(val, pd.Series) else val[0]
+                        except Exception:
+                            return None
+                    return val
+            return None
+
+        for _, row in stock_df.iterrows():
+            logging.debug(ic(_, Stkhisd))
+            date_str = row.get('Date')
+            if inhistorycheck(stockdb, Symbol, date_str):
+                logging.debug("%s is in the database for date %s", Symbol, date_str)
+                continue
+            # Map DataFrame columns to variables; handle flattened/multiindex column names
+            open_v = _find_val(row, 'open')
+            high_v = _find_val(row, 'high')
+            low_v = _find_val(row, 'low')
+            close_v = _find_val(row, 'close')
+            adj_v = _find_val(row, 'adj') or _find_val(row, 'adjclose') or close_v
+            vol_v = _find_val(row, 'volume')
+            params = (date_str, Symbol, open_v, high_v, low_v, close_v, adj_v, vol_v)
+            try:
+                with stockdb.cursor() as cur:
+                    cur.execute(insert_sql, params)
+                Stkhisd += 1
+            except pymysql.Error as error:
+                logging.error("Failed to insert history for %s on %s: %s", Symbol, date_str, error)
         Stkcount += 1
         Totalcnt += Stkhisd  
         Stkhisd = 0
@@ -288,9 +355,9 @@ def main() -> None:
     print(f"Total stocks processed is {Stkcount}")
     print(f"Total data inserts is {Totalcnt}")
 
-    # Close info database We are done    
+    # Close info database We are done
     stockdb.commit()
-    stockdb.close()
+    closedatabase(stockdb)
 
 
 if __name__ == '__main__':
