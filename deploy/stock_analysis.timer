@@ -1,0 +1,13 @@
+[Unit]
+Description=Run stock analysis Sun-Thu 20:30 ET
+
+[Timer]
+OnCalendar=Sun 20:30:00
+OnCalendar=Mon 20:30:00
+OnCalendar=Tue 20:30:00
+OnCalendar=Wed 20:30:00
+OnCalendar=Thu 20:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

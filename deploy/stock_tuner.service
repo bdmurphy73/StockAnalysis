@@ -1,0 +1,11 @@
+[Unit]
+Description=StockAnalysis Nightly Tuner
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/PyFin/Documents/StockAnalysis/StockAnalysis
+ExecStart=/home/PyFin/Documents/StockAnalysis/StockAnalysis/venv_ai/bin/python nightly_tuner.py --trials 500
+
+[Install]
+WantedBy=default.target

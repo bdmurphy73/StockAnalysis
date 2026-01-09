@@ -1,0 +1,12 @@
+[Unit]
+Description=StockAnalysis daily stock history downloader
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/PyFin/Documents/StockAnalysis/StockAnalysis
+ExecStart=/home/PyFin/Documents/StockAnalysis/StockAnalysis/scripts/run_daily_download.sh
+
+[Install]
+WantedBy=default.target

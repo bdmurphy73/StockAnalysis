@@ -1,0 +1,12 @@
+{
+  "model_name": "GradientBoosting",
+  "auc": 0.5354719862034014,
+  "feature_cols": [
+    "ret_1",
+    "ret_3",
+    "sma_ratio",
+    "vol_10",
+    "rsi"
+  ],
+  "timestamp_utc": "20251220T161710Z"
+}

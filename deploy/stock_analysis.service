@@ -1,0 +1,8 @@
+[Unit]
+Description=Run stock analysis and email top5
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documents/StockAnalysis/StockAnalysis
+ExecStart=%h/Documents/StockAnalysis/StockAnalysis/scripts/run_analysis_email.sh
+Environment=TZ=America/New_York

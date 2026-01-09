@@ -1,0 +1,11 @@
+[Unit]
+Description=Timer to run StockAnalysis downloader weekdays at 18:00 (local time)
+
+[Timer]
+OnCalendar=Mon..Fri 18:00
+Persistent=true
+# If your system timezone is not Eastern, either adjust the time above or
+# run the timer under a system with TZ set to America/New_York.
+
+[Install]
+WantedBy=timers.target
