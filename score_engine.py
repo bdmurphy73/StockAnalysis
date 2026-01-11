@@ -57,62 +57,81 @@ def score_from_df(df, config: dict = None) -> Dict[str, Any]:
     last = data.iloc[-1]
     prev = data.iloc[-2] if len(data) > 1 else last
 
+    import numpy as _np
+
     wsum = 0.0
     max_positive = sum(v for v in weights.values() if v > 0)
     signals = {}
 
-    # MACD histogram positive
-    macd_hist = float(last.get('MACD_HIST', 0) or 0)
-    signals['macd_hist_pos'] = macd_hist > 0
-    if macd_hist > 0:
-        wsum += weights.get('macd', 0)
-
     close = float(last['Close'])
 
-    # SMA/EMA conditions
-    signals['close_above_sma20'] = close > float(last.get('SMA_20', close))
-    if signals['close_above_sma20']:
-        wsum += weights.get('sma20', 0)
+    # MACD: use magnitude (relative to recent max) rather than binary
+    macd_hist = float(last.get('MACD_HIST', 0) or 0)
+    hist_abs_max = float(_np.nanmax(_np.abs(data.get('MACD_HIST', _np.array([macd_hist])))) or 1.0)
+    macd_strength = 0.0
+    if hist_abs_max > 0:
+        macd_strength = max(0.0, min(1.0, macd_hist / hist_abs_max))
+    signals['macd_strength'] = round(macd_strength, 3)
+    if macd_strength > 0:
+        wsum += weights.get('macd', 0) * macd_strength
 
-    signals['close_above_sma50'] = close > float(last.get('SMA_50', close))
-    if signals['close_above_sma50']:
-        wsum += weights.get('sma50', 0)
+    # SMA/EMA: use distance above SMA as small continuous contribution
+    sma20 = float(last.get('SMA_20', close))
+    sma50 = float(last.get('SMA_50', close))
+    ema12 = float(last.get('EMA_12', 0))
+    ema26 = float(last.get('EMA_26', 0))
 
-    signals['ema12_above_ema26'] = float(last.get('EMA_12', 0)) > float(last.get('EMA_26', 0))
-    if signals['ema12_above_ema26']:
+    def _rel_diff(a, b):
+        return (a - b) / b if b and b != 0 else 0.0
+
+    s20_strength = max(0.0, min(1.0, _rel_diff(close, sma20) * 10.0))
+    s50_strength = max(0.0, min(1.0, _rel_diff(close, sma50) * 10.0))
+    ema_strength = 1.0 if ema12 > ema26 else 0.0
+
+    signals['close_above_sma20'] = round(s20_strength, 3)
+    signals['close_above_sma50'] = round(s50_strength, 3)
+    signals['ema12_above_ema26'] = bool(ema_strength)
+
+    wsum += weights.get('sma20', 0) * s20_strength
+    wsum += weights.get('sma50', 0) * s50_strength
+    if ema_strength:
         wsum += weights.get('ema', 0)
 
-    # RSI
+    # RSI: continuous contribution centered at 50 (positive when <50, negative when >50)
     r = float(last.get('RSI_14', 50))
-    signals['rsi'] = r
-    if r < 30:
-        wsum += weights.get('rsi', 0)
-    elif r > 70:
-        wsum -= weights.get('rsi', 0)
+    rsi_cont = (50.0 - r) / 50.0
+    signals['rsi'] = round(r, 2)
+    wsum += weights.get('rsi', 0) * rsi_cont
 
-    # Bollinger: bonus if price between lower and mid band (potential bounce) or above mid
+    # Bollinger: normalized position between low (0) and up (1)
     bb_low = float(last.get('BB_LOW', close))
+    bb_up = float(last.get('BB_UP', close))
     bb_mid = float(last.get('BB_MID', close))
-    signals['bb_position'] = 'above_mid' if close > bb_mid else ('between' if close >= bb_low else 'below_low')
-    if close > bb_mid:
-        wsum += weights.get('bb', 0) * 0.5
-    elif bb_low <= close <= bb_mid:
-        wsum += weights.get('bb', 0)
+    bb_range = bb_up - bb_low if (bb_up - bb_low) != 0 else 1.0
+    bb_pos = max(0.0, min(1.0, (close - bb_low) / bb_range))
+    signals['bb_position'] = round(bb_pos, 3)
+    wsum += weights.get('bb', 0) * bb_pos
 
-    # Stochastic bullish cross
+    # Stochastic: continuous based on K - D normalized to 0..1
     k = float(last.get('STOCH_K', 0))
     d = float(last.get('STOCH_D', 0))
-    pk = float(prev.get('STOCH_K', k))
-    pdv = float(prev.get('STOCH_D', d))
-    stoch_cross = (k > d) and (pk <= pdv)
-    signals['stoch_bull_cross'] = stoch_cross
-    if stoch_cross:
-        wsum += weights.get('stoch', 0)
+    stoch_strength = max(0.0, min(1.0, (k - d) / 100.0))
+    signals['stoch_strength'] = round(stoch_strength, 3)
+    wsum += weights.get('stoch', 0) * stoch_strength
 
-    # Normalize
+    # Secondary metrics: recent volume and momentum (for tie-breakers)
+    vol_recent = float(data.get('Volume').tail(5).mean() if 'Volume' in data else last.get('Volume', 0))
+    mom = float(last.get('MOM_10', 0))
+    signals['volume_avg_5'] = int(vol_recent)
+    signals['momentum_10'] = round(mom, 3)
+
+    # Normalize to 0-100
     score_pct = max(0.0, min(100.0, 100.0 * (wsum / max_positive) if max_positive else 0.0))
 
-    return {'score': round(score_pct, 2), 'signals': signals, 'raw': round(wsum, 3)}
+    # include a compact 'secondary' metric for tie-break sorting
+    secondary = {'sec_score': round((_np.log1p(vol_recent) * abs(mom)) if vol_recent and mom else 0.0, 3)}
+
+    return {'score': round(score_pct, 2), 'signals': signals, 'raw': round(wsum, 3), 'secondary': secondary}
 
 
 def _create_scores_table(conn):
@@ -228,9 +247,16 @@ def rank_symbols(conn=None, symbols: Optional[List[str]] = None, lookback_days: 
 
     logger.info('Scoring completed in %.2fs', time.time() - start)
 
-    # Filter and sort
+    # Filter and sort — use secondary sec_score as tie-breaker when available
     passed = [r for r in results if r.get('score', 0) >= threshold]
-    passed = sorted(passed, key=lambda x: x.get('score', 0), reverse=True)
+    def _sort_key(x):
+        sec = 0.0
+        try:
+            sec = float(x.get('secondary', {}).get('sec_score', 0.0))
+        except Exception:
+            sec = 0.0
+        return (float(x.get('score', 0.0)), sec)
+    passed = sorted(passed, key=_sort_key, reverse=True)
 
     if close_conn:
         closedatabase(conn)
