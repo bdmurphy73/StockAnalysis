@@ -131,3 +131,288 @@ Traceback (most recent call last):
     raise TimeoutExpired(
 subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
 2025-12-26 01:00:00,901 INFO Nightly tuner finished in 3600.1 seconds
+2025-12-27 00:00:01,682 INFO Nightly tuner starting; trials=500
+2025-12-27 00:00:01,686 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2025-12-27 01:00:01,732 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2025-12-27 01:00:01,745 INFO Nightly tuner finished in 3600.1 seconds
+2025-12-28 00:00:01,379 INFO Nightly tuner starting; trials=500
+2025-12-28 00:00:01,381 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2025-12-28 01:00:01,451 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2025-12-28 01:00:01,470 INFO Nightly tuner finished in 3600.1 seconds
+2025-12-29 00:00:02,177 INFO Nightly tuner starting; trials=500
+2025-12-29 00:00:02,178 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2025-12-29 01:00:02,259 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2025-12-29 01:00:02,275 INFO Nightly tuner finished in 3600.1 seconds
+2025-12-30 00:00:01,792 INFO Nightly tuner starting; trials=500
+2025-12-30 00:00:01,793 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2025-12-30 01:00:01,887 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2025-12-30 01:00:01,904 INFO Nightly tuner finished in 3600.1 seconds
+2025-12-31 00:00:02,311 INFO Nightly tuner starting; trials=500
+2025-12-31 00:00:02,316 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2025-12-31 01:00:02,415 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2025-12-31 01:00:02,424 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-01 00:00:01,684 INFO Nightly tuner starting; trials=500
+2026-01-01 00:00:01,684 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-01 01:00:01,789 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-01 01:00:01,797 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-02 00:00:02,097 INFO Nightly tuner starting; trials=500
+2026-01-02 00:00:02,097 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-02 01:00:02,214 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-02 01:00:02,223 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-03 00:00:01,473 INFO Nightly tuner starting; trials=500
+2026-01-03 00:00:01,479 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-03 01:00:01,593 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-03 01:00:01,602 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-04 00:00:01,921 INFO Nightly tuner starting; trials=500
+2026-01-04 00:00:01,922 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-04 01:00:02,050 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-04 01:00:02,065 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-05 00:00:01,452 INFO Nightly tuner starting; trials=500
+2026-01-05 00:00:01,455 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-05 01:00:01,519 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-05 01:00:01,536 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-06 00:00:01,699 INFO Nightly tuner starting; trials=500
+2026-01-06 00:00:01,700 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-06 01:00:01,748 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-06 01:00:01,761 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-07 00:00:01,843 INFO Nightly tuner starting; trials=500
+2026-01-07 00:00:01,846 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-07 01:00:01,892 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-07 01:00:01,901 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-08 00:00:02,181 INFO Nightly tuner starting; trials=500
+2026-01-08 00:00:02,183 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-08 01:00:02,246 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-08 01:00:02,257 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-09 00:00:01,383 INFO Nightly tuner starting; trials=500
+2026-01-09 00:00:01,384 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-09 01:00:01,447 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-09 01:00:01,460 INFO Nightly tuner finished in 3600.1 seconds
+2026-01-10 00:00:01,562 INFO Nightly tuner starting; trials=500
+2026-01-10 00:00:01,563 INFO Running: venv_ai/bin/python Optimizer.py --trials 500
+2026-01-10 01:00:01,592 ERROR Optimizer run failed: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+Traceback (most recent call last):
+  File "/home/PyFin/Documents/StockAnalysis/StockAnalysis/nightly_tuner.py", line 48, in main
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['venv_ai/bin/python', 'Optimizer.py', '--trials', '500']' timed out after 3600 seconds
+2026-01-10 01:00:01,602 INFO Nightly tuner finished in 3600.0 seconds
