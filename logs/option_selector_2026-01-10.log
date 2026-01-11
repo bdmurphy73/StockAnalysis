@@ -1,0 +1,4 @@
+2026-01-10 21:37:42 INFO Connecting to DB stockanal at localhost:3306
+2026-01-10 21:37:42 INFO Database connection established
+2026-01-10 21:37:42 INFO Selecting options for 0 symbols (date=2026-01-10)
+2026-01-10 21:37:42 INFO Database connection closed
